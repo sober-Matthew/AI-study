@@ -1,0 +1,86 @@
+import torch
+import torch.nn as nn
+import torch.optim as optim
+
+
+
+# =========================
+# 1. 构造数据：y = 0.5x^2 - 3x + 2 + 噪声
+# =========================
+N = 200   # 样本数量
+x = torch.linspace(-2, 2, steps=N).unsqueeze(1)  # shape: (N, 1)
+
+true_a = 1
+true_b = -3.0
+true_c = 2.0
+
+noise = torch.randn_like(x) * 1.0
+y = true_a * x**2 + true_b * x + true_c + noise  # shape: (N, 1)
+
+# =========================
+# 2. 构造多项式特征： [x, x^2]（二次多项式）
+#    如果想要三次：再加 x**3
+# =========================
+def poly_features(x, degree=2):
+    """
+    x: (N, 1)
+    return: (N, degree)
+    例如 degree=2 时: [x, x^2]
+    """
+    feats = []
+    for d in range(1, degree + 1):
+        feats.append(x ** d)
+    return torch.cat(feats, dim=1)
+
+degree = 2
+X_poly = poly_features(x, degree=degree)  # shape: (N, 2) -> [x, x^2]
+
+# =========================
+# 3. 定义“线性模型”但输入是多项式特征
+#    y_pred = w1 * x + w2 * x^2 + b
+# =========================
+model = nn.Linear(in_features=degree, out_features=1)  # 相当于多项式回归
+
+# =========================
+# 4. 定义损失函数 + 优化器
+# =========================
+criterion = nn.MSELoss()
+
+#加过L2正则了weight_decay
+optimizer = optim.SGD(model.parameters(), lr=0.01,weight_decay=1e-3)
+
+# =========================
+# 5. 训练循环
+# =========================
+num_epochs = 10000
+
+for epoch in range(num_epochs):
+    # (1) 前向传播：注意用 X_poly 而不是 x
+    y_pred = model(X_poly)
+
+    # (2) 损失
+    loss = criterion(y_pred, y)
+
+    # (3) 反向传播
+    optimizer.zero_grad()
+    loss.backward()
+
+    # (4) 更新参数
+    optimizer.step()
+
+    if (epoch + 1) % 100 == 0:
+        print(f"Epoch [{epoch+1}/{num_epochs}] Loss: {loss.item():}")
+
+# =========================
+# 6. 查看学到的多项式系数
+# =========================
+with torch.no_grad():
+    w = model.weight.view(-1)  # [w1, w2]
+    b = model.bias.item()
+
+print("\n训练结束：")
+print(f"真实多项式:   y = {true_a} * x^2 + ({true_b}) * x + ({true_c})")
+print("学到的多项式（注意顺序是 x, x^2）：")
+print(f"y ≈ {w[1].item():.4f} * x^2 + ({w[0].item():.4f}) * x + ({b:.4f})")
+
+  
