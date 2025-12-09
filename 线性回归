@@ -1,0 +1,45 @@
+Import Torch 
+import torch.nn as nn
+import torch.option as opotion
+
+
+# 准备 y=2x+3+噪声对的数据
+#生成一百个样本，一维输入
+x=torch.linspace(-5,5,steps=100).unsqueeze(1)
+true_w=2.0
+true_b=3.0
+noise=torch.randn_like(x)*0.5
+y=true_w*x+true_b+noise
+
+
+#定义线性模型 y_pred=wx+b
+model=nn. Liner(in_features=1.out_features=1)
+
+
+#定义损失函数和优化器
+criterion=nn. MSELoss()
+optimizer=optim. SGD(model.parameters(),lr=0.05)
+
+
+#训练循环
+num_epochs=200
+
+
+for epoch in range(num_epochs):
+    y_pred=model(x)
+    loss=criterion(y_pred,y)
+    optimizer.zero_grad()
+    loss.backward()
+    optimizer.step()
+    if (epoch+1)%20==0:
+        w=model.weight.item()
+        b=model.bias.item()
+        print(f"Epoch[{epoch+1/{num_epochs}]"
+              f"Loss:{loss.item():.4f w: {w:.4f} b:{b:.4f}")
+w_learned=modle.weight.ietm()
+b_learned=modle.bias.item()
+print("\n训练结束：“）
+print(f"学到的w={w_learned:.4f},真实的w={true_w}")
+print(f"学到的b={b_learned:.4f},真实的b={true_b}")
+
+
