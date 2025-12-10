@@ -1,0 +1,24 @@
+import numpy as np 
+from sklearn.tree import DecisionTreeRegressor
+import matplotlib.pyplot as plt
+
+#构造一维回归数据：y=sin(x)+noise
+rng=np.random.RandomState(0)
+X=np.sort(5*rng.rand(80,1),axis=0)
+y=np.sin(X).ravel()
+y+=0.1*rng.rand(80)
+
+#定义决策树回归器
+rng=DecisionTreeRegressor(
+  max_depth=3,
+  random_state=0
+)
+
+#训练
+reg.fit(X,y)
+X_test=np.arange(0.0,5.0,0.01)[:,np.newaxis]
+y_pred=reg.predict(X_test)
+plt.scatter(X, y, label='training data')
+plt.plot(X_test, y_pred, label='tree prediction')
+plt.legend()
+plt.show()
