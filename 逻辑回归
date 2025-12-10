@@ -1,0 +1,50 @@
+import torch
+import torch.nn as nn
+import torch.optim as optim
+
+#构造两个数据集
+N=100
+class1=torch.randn(N,2)+torch.tensor([-2.0,-2.0])
+label1=torch.zeros(N,1)
+
+class2=torch.randn(N,2)+torch.tensor([2.0,2.0])
+label2=torch.ones(N,1)
+
+#合并数据
+x=torch.cat([class1,class2],dim=0)
+y=torch.cat([label1,label2],dim=0)
+
+#定义逻辑回归模型
+class LogisticRegression(nn.Module):
+    def __init__(self,in_features):
+        super().__init__()
+        self.linear=nn.Linear(in_features,1)
+    def forward(self,x):
+         return self.linear(x)
+model=LogisticRegression(in_features=2)
+#损失和优化
+criterion=nn.BCEWithLogitsLoss()
+optimizer=optim.SGD(model.parameters(),lr=0.01)
+
+num_epochs=200
+for epoch in range(num_epochs):
+    logits=model(x)
+    loss=criterion(logits,y)
+    optimizer.zero_grad()
+    loss.backward() 
+    optimizer.step()
+    if (epoch+1)%20==0:
+        with torch.no_grad():
+            probs=torch.sigmoid(logits)
+            pred=(probs>=0.5).float()
+            acc=(pred==y).float().mean().item()
+        print(f"epoch:{epoch+1}/{num_epochs},loss:{loss.item():.4f},Acc:{acc*100:.2f}%")
+with torch.no_grad():
+    w=model.linear.weight.view(-1)
+    b=model.linear.bias.item()
+print("\n训练结束")
+print(f"学到的w：{w.tolist()}")
+print(f"学到的b：{b:.4f}")
+
+
+
