@@ -1,0 +1,36 @@
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.model_selection import train_test_split
+from sklearn.datasets import make_classification
+import matplotlib.pyplot as plt
+import numpy as np
+
+#造一个二维的二分类数据集
+X,y=make_classification(
+   n_samples=500,
+   n_features=2,
+   n_redundant=0,
+   n_clusters_per_class=1,
+   random_state=0
+   )
+
+#划分数据集测试集
+X_train,X_teat,y_train,y_test=train_test_spilt(
+    X,y,test_size=0.3,random_state=42
+    )
+
+#定义随机森林分类器
+clf=RandomForestClassifier(
+    n_estimators=100,
+    max_depth=5,
+    max_features='sqrt',
+    random_state=0
+    )
+
+  #训练
+  clf.fit(X_train,y_train)
+
+  #在测试集上面评估
+  acc=clf.score(X_test,y_test)
+  print(f"测试集准确率：{acc*100:.2f}%")
+
+  print("特征重要性",clf.feature_importances_)
